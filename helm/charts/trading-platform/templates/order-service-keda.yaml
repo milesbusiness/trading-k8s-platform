@@ -1,0 +1,34 @@
+{{- if and .Values.orderService.enabled .Values.orderService.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: order-service-scaler
+  namespace: {{ .Values.global.namespace }}
+spec:
+  scaleTargetRef:
+    name: order-service
+  minReplicaCount: {{ .Values.orderService.keda.minReplicas }}
+  maxReplicaCount: {{ .Values.orderService.keda.maxReplicas }}
+  cooldownPeriod: 30
+  pollingInterval: 5
+  triggers:
+    - type: rabbitmq
+      metadata:
+        protocol: amqp
+        queueName: {{ .Values.orderService.keda.rabbitmqQueueName }}
+        mode: QueueLength
+        value: "{{ .Values.orderService.keda.targetQueueLength }}"
+      authenticationRef:
+        name: rabbitmq-trigger-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: rabbitmq-trigger-auth
+  namespace: {{ .Values.global.namespace }}
+spec:
+  secretTargetRef:
+    - parameter: host
+      name: rabbitmq-secret
+      key: amqp-uri
+{{- end }}

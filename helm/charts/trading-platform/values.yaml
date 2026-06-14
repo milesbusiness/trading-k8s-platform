@@ -1,0 +1,84 @@
+global:
+  registry: ghcr.io/milesbusiness
+  imageTag: latest
+  namespace: trading
+  environment: production
+
+marketDataService:
+  enabled: true
+  replicas: 2
+  image: trading-k8s-platform/market-data-service
+  port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+orderService:
+  enabled: true
+  replicas: 3
+  image: trading-k8s-platform/order-service
+  port: 8081
+  keda:
+    enabled: true
+    rabbitmqQueueName: orders
+    minReplicas: 0
+    maxReplicas: 20
+    targetQueueLength: 10
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+riskService:
+  enabled: true
+  replicas: 3
+  image: trading-k8s-platform/risk-service
+  port: 8082
+  # Risk service must always have replicas — never scale to zero
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  podDisruptionBudget:
+    minAvailable: 2
+
+settlementService:
+  enabled: true
+  replicas: 2
+  image: trading-k8s-platform/settlement-service
+  port: 8083
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+rabbitmq:
+  enabled: true
+  auth:
+    username: trading
+    existingPasswordSecret: rabbitmq-secret
+  persistence:
+    enabled: true
+    size: 20Gi
+  replicaCount: 3
+
+prometheus:
+  enabled: true
+  scrapeInterval: 15s
+
+grafana:
+  enabled: true
+  adminExistingSecret: grafana-admin-secret

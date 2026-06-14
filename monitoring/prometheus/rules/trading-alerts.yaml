@@ -1,0 +1,74 @@
+groups:
+  - name: trading-platform-alerts
+    interval: 30s
+    rules:
+      # Order service latency
+      - alert: OrderServiceHighLatency
+        expr: histogram_quantile(0.99, rate(order_processing_seconds_bucket[5m])) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          team: trading-platform
+        annotations:
+          summary: "Order service P99 latency > 100ms"
+          description: "Order processing P99 latency is {{ $value | humanizeDuration }} — above 100ms SLA threshold."
+          runbook: "https://wiki.internal/runbooks/order-service-latency"
+
+      # Risk service availability
+      - alert: RiskServiceDown
+        expr: up{job="risk-service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          team: trading-platform
+          page: "true"
+        annotations:
+          summary: "Risk service is DOWN"
+          description: "Risk service has been down for > 30 seconds. All orders are being rejected."
+          runbook: "https://wiki.internal/runbooks/risk-service-down"
+
+      # Settlement failure rate
+      - alert: HighSettlementFailureRate
+        expr: rate(settlements_failed_total[5m]) / rate(settlements_created_total[5m]) > 0.001
+        for: 5m
+        labels:
+          severity: critical
+          team: trading-platform
+          regulatory: csdr
+        annotations:
+          summary: "Settlement failure rate > 0.1% (CSDR compliance risk)"
+          description: "Settlement failure rate is {{ $value | humanizePercentage }}. CSDR mandates < 0.1% failure rate."
+          runbook: "https://wiki.internal/runbooks/settlement-failures"
+
+      # Market data feed health
+      - alert: MarketDataFeedStale
+        expr: rate(market_data_ticks_published_total[1m]) == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: trading-platform
+        annotations:
+          summary: "No market data ticks in the last minute"
+          description: "Market data feed appears stalled. Trading may be impacted."
+
+      # Risk check approval rate drop
+      - alert: RiskCheckRejectionSpike
+        expr: rate(risk_checks_total{result="rejected"}[5m]) / rate(risk_checks_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          team: trading-platform
+        annotations:
+          summary: "Risk check rejection rate > 10%"
+          description: "{{ $value | humanizePercentage }} of risk checks are being rejected — possible limit breach or misconfiguration."
+
+      # RabbitMQ queue buildup
+      - alert: OrderQueueBacklog
+        expr: rabbitmq_queue_messages{queue="orders"} > 1000
+        for: 5m
+        labels:
+          severity: warning
+          team: trading-platform
+        annotations:
+          summary: "Order queue backlog > 1000 messages"
+          description: "Order queue has {{ $value }} messages pending. Consider increasing order service replicas."
