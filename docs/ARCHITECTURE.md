@@ -143,3 +143,35 @@ helm/charts/trading-platform/
 | settlement | Batch, T+2 | Regulatory impact (CSDR) |
 
 Each service scales independently. Risk service has strict PDB (`minAvailable: 2`) — losing it blocks all order flow, so it is never fully cycled in a rolling update.
+
+---
+
+## References
+
+### Kubernetes & AKS
+- [AKS docs — Production best practices](https://learn.microsoft.com/en-us/azure/aks/best-practices)
+- [Kubernetes docs — Pod Disruption Budgets](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/)
+- [YouTube: Kubernetes production best practices (TechWorld with Nana, 45 min)](https://www.youtube.com/watch?v=fy8SHvNZGeE)
+
+### KEDA
+- [KEDA docs — RabbitMQ scaler](https://keda.sh/docs/scalers/rabbitmq-queue/)
+- [KEDA docs — Scale to zero](https://keda.sh/docs/concepts/scaling-deployments/#scaling-to-zero)
+- [YouTube: KEDA — Kubernetes Event-Driven Autoscaling (Microsoft, 30 min)](https://www.youtube.com/watch?v=3lcaawKAv6s)
+
+### ArgoCD / GitOps
+- [ArgoCD docs](https://argo-cd.readthedocs.io/en/stable/)
+- [GitOps principles (OpenGitOps)](https://opengitops.dev/)
+- [YouTube: ArgoCD Tutorial for Beginners (TechWorld with Nana, 1h45m)](https://www.youtube.com/watch?v=MeU5_k9ssrs)
+
+### Helm
+- [Helm docs — chart development](https://helm.sh/docs/chart_template_guide/)
+- [YouTube: Helm crash course (freeCodeCamp, 1h)](https://www.youtube.com/watch?v=gg-GuHs8Nsk)
+
+### Prometheus & Alerting
+- [Prometheus docs — alerting rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)
+- [PromQL cheat sheet](https://promlabs.com/promql-cheat-sheet/)
+- [YouTube: Prometheus monitoring tutorial (TechWorld with Nana, 2h)](https://www.youtube.com/watch?v=h4Sl21AKiDg)
+
+### Trading Microservices
+- [MiFID II — Algorithmic trading requirements (Art. 17)](https://www.esma.europa.eu/publications-and-data/interactive-single-rulebook/mifid-ii/article-17)
+- [CSDR settlement fails reporting (Art. 7)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014R0909)
